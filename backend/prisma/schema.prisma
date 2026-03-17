@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────
+
+enum Role {
+  STUDENT
+  CLUB
+  ADMIN
+}
+
+enum RegistrationStatus {
+  REGISTERED
+  WAITLISTED
+  CANCELLED
+}
+
+// ─────────────────────────────────────────
+// Models
+// ─────────────────────────────────────────
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+
+  eventsCreated Event[]      @relation("EventCreator")
+  registrations Registration[]
+}
+
+model Event {
+  id              String   @id @default(uuid())
+  title           String
+  description     String
+  venue           String
+  date            DateTime
+  maxParticipants Int
+  organizerName   String
+  contactEmail    String
+  contactPhone    String?
+  createdAt       DateTime @default(now())
+
+  // Foreign key
+  creatorId String
+
+  // Relations
+  creator       User           @relation("EventCreator", fields: [creatorId], references: [id])
+  registrations Registration[]
+}
+
+model Registration {
+  id      String             @id @default(uuid())
+  status  RegistrationStatus @default(REGISTERED)
+
+  userId  String
+  eventId String
+
+  user  User  @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@unique([userId, eventId])
+}
