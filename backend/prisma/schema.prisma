@@ -6,10 +6,6 @@ datasource db {
   provider = "postgresql"
 }
 
-// ─────────────────────────────────────────
-// Enums
-// ─────────────────────────────────────────
-
 enum Role {
   STUDENT
   CLUB
@@ -22,10 +18,6 @@ enum RegistrationStatus {
   CANCELLED
 }
 
-// ─────────────────────────────────────────
-// Models
-// ─────────────────────────────────────────
-
 model User {
   id        String   @id @default(uuid())
   name      String
@@ -33,13 +25,14 @@ model User {
   password  String
   role      Role
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  eventsCreated Event[]      @relation("EventCreator")
+  eventsCreated Event[]        @relation("EventCreator")
   registrations Registration[]
 }
 
 model Event {
-  id              String   @id @default(uuid())
+  id              String    @id @default(uuid())
   title           String
   description     String
   venue           String
@@ -48,19 +41,19 @@ model Event {
   organizerName   String
   contactEmail    String
   contactPhone    String?
-  createdAt       DateTime @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  // Foreign key
   creatorId String
+  creator   User   @relation("EventCreator", fields: [creatorId], references: [id])
 
-  // Relations
-  creator       User           @relation("EventCreator", fields: [creatorId], references: [id])
   registrations Registration[]
 }
 
 model Registration {
-  id      String             @id @default(uuid())
-  status  RegistrationStatus @default(REGISTERED)
+  id        String             @id @default(uuid())
+  status    RegistrationStatus @default(REGISTERED)
+  createdAt DateTime           @default(now())
 
   userId  String
   eventId String
